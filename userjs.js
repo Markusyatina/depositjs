@@ -1,79 +1,179 @@
-// ==UserScript==
-// @name           Depositfiles Helper
-// @description    Get direct link without capcha & timer from depositfiles.com
-// @version        1.1.3
-// @date           2012-04-13
-// @author         ReklatsMasters
-// @homepageURL    https://github.com/ReklatsMasters/depositjs
-// @updateURL      https://raw.github.com/ReklatsMasters/depositjs/master/userjs.js
-// @include        http://depositfiles.com/files/*
-// @include        http://depositfiles.com/*/files/*
-// @include        http://dfiles.ru/*/files/*
-// @include        http://dfiles.ru/files/*
-// @include        http://dfiles.eu/files/*
-// @require        http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js
-// @icon           http://img3.depositfiles.com/images/favicon.ico
-// ==/UserScript==
+'use strict';
 
-(function(window){
-	function main(){
-		var head = $('<div id="hack-head" style="background:#777; width:100%;">\
-		<div id="hack-body" style="margin:0 auto;text-align:center;padding-top:10px; width: 70%;">Loading...</div></div>');
-		head.prependTo("body");
-		
-		if ($('body').hasClass('page_download')){
-			if (navigator.userAgent.indexOf('DepositFiles/FileManager') + 1)
-					doPaste(false);
-				else
-					doError();
+////////////////////////////////////
+
+var md5      = require('spark-md5');
+var format   = require('url').format;
+var parseUrl = require('url').parse;
+
+////////////////////////////////////
+/**
+ * Генерирует подпись запроса
+ *
+ * @param uid {String} id загрузки / пользователя из имени загрузчика
+ * @return {String}
+ */
+function sign(uid) {
+	return md5.hash(uid + "dd64vJK3s.dV1/z");
+}
+
+/**
+ * Генерирует url для обращения к Fastdownload API и получения ссылки на загрузку
+ *
+ * @param uid {String} id загрузки / пользователя из имени загрузчика
+ * @return {String} 
+ */
+function createUrl(uid) {
+	var urlObj = {
+		protocol: "http",
+		hostname: location.hostname,
+		pathname: "/api/fastdownload/get",
+		query: {
+			uid:   uid,
+			os:   "win8x64",
+			appid: "dfdownloader",
+			sign: sign(uid)
 		}
-		else 
-			if ($('body').hasClass('page_download_gateway')){
-				if (navigator.userAgent.indexOf('DepositFiles/FileManager') + 1)
-					doLoader();
-				else
-					doError();
+	};
+
+	return format(urlObj, true);
+}
+
+/**
+ * Проверяет, является ли текущая страница 
+ * страницей с таймером
+ *
+ * @return {bool}
+ */
+function isDownloadPage() {
+	return document.body.className.indexOf('page_download') != -1;
+}
+
+/**
+ * Проверяет, является ли текушая страница
+ * страницей с выбором метода загрузки
+ *
+ * @return {bool}
+ */
+function isGateawayPage() {
+	return document.body.className.indexOf('page_download_gateway') != -1;
+}
+
+/**
+ * Получает данные страницы с таймером
+ *
+ * @param cb {Function}
+ */
+function fetchDownloadPage(cb) {
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', location.pathname, true);
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4) {
+			if(xhr.status >= 200 && xhr.status < 300) {
+				var domparser = new DOMParser();
+				var dom = domparser.parseFromString(xhr.responseText, 'text/html');
+
+				setTimeout(cb.bind(null, dom), 0);
+			} else {
+				throw new Error('Download error - ' + xhr.status);
 			}
-	}
-	
-	function doLoader(){
-		var xhr = new XMLHttpRequest();
-		xhr.open('POST', location.pathname, true);
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState == 4) {
-				if(xhr.status == 200) {
-					doPaste(xhr.responseText);
+		}
+	};
+	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	xhr.send('gateway_result=1');
+}
+
+/**
+ * Обращается к API и получает страницу ссылку загрузки
+ *
+ * @param api_url {String} ссылка на Fastdownload API
+ * @param cb {Function}
+ */
+function fetchDownloadUrl(api_url, cb) {
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', api_url, true);
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4) {
+			if(xhr.status >= 200 && xhr.status < 300) {
+
+				var jsapi = JSON.parse( xhr.responseText );
+
+				if (!jsapi.status_code) {
+					throw new Error('Download error - API request fail');
 				}
+
+				setTimeout(cb.bind(null, jsapi.data.file.download_url), 0);
+			} else {
+				throw new Error('Download error - ' + xhr.status);
 			}
-		};
-		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-		xhr.send('gateway_result=1');
-	}
-	
-	function doLink(html){
-		var link = $('.repeat:first a', html).attr('href');
-		link = (typeof link == 'undefined') ? false : link;
-		return link;
+		}
+	};
+
+	var setRequestHeader = xhr.setRequestHeader;
+
+	xhr.setRequestHeader = function(name, value) {
+		if (name == 'X-Requested-With') { return; }
+		
+		if (name == 'User-Agent') {
+			return 'Deposit Files Downloader';
+		}
+
+		setRequestHeader.call(this, name, value);
+	};
+
+	xhr.send();
+}
+
+/**
+ * Получает ссылку на загрузчик
+ *
+ * @param tag {HTMLElement} элемент формы со ссылкой на загрузчик
+ * @return {String}
+ */
+function getDownloaderUrl(tag) {
+	if (tag.nodeName.toLowerCase() != 'form') {
+		throw new Error('Impossible to find download url');
 	}
 
-	function doPaste(html){
-		if (!html) html = document.body;
-		var message = doLink(html);
-		if (message){
-			$('#hack-body').html('<a style="font-size:16pt;" href="'+message+'">Download</a>');
-			$('#hack-head').css({'height':'40px','background':'green'});
-		}
-		else {
-			$('#hack-body').html('<span style="font-size:14pt;">' + $('.ipbg:first strong:first', html).html() + "</span>");
-			$('#hack-head').css({'height':'70px','background':'Burlywood'});
-		}
-		$('#hack-body').css({'width':'50%', 'text-align':'center'});
-	}
+	return tag.action;
+}
 
-	function doError(){
-		$('#hack-body').html('Please add <input type=text value="DepositFiles/FileManager 0.9.9.206" size=35> to your User-Agent. See detailed <a href="https://github.com/ReklatsMasters/depositjs" target="blank">homepage</a>');
-		$('#hack-head').css({'height':'40px','background':'Burlywood'});
+/**
+ * Извлекает id загрузки из ссылки на загрузчик
+ *
+ * @param downloader_url {String} ссылка на загрузчик
+ * @return {String}
+ */
+function getUidFromUrl(downloader_url) {
+	var file = parseUrl(downloader_url).pathname;
+	return file.split('_')[1];
+}
+
+/**
+ * Главная функция для страницы загрузки
+ * 
+ * @param dom {HTMLDocument}
+ */
+function downloadMain(dom) {
+	var downloader_url = getDownloaderUrl(dom.querySelector('#networkdownloader'));
+	var uid = getUidFromUrl(downloader_url);
+	var api_url = createUrl(uid);
+
+	fetchDownloadUrl(api_url, function(download_url){
+		console.log( download_url );
+	});
+}
+
+function main() {
+	if (isGateawayPage) {
+		fetchDownloadPage( downloadMain );
+
+	} else if (isDownloadPage()) {
+		downloadMain(document);
+
+	} else {
+		throw new Error('Undefined page');
 	}
-	
-	window.addEventListener('DOMContentLoaded', main, false);
-})(window);
+}
+
+window.addEventListener('DOMContentLoaded', main, false);

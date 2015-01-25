@@ -1,0 +1,28 @@
+{
+  "name": "depositjs",
+  "version": "0.0.0",
+  "description": "Helper with downloads for depositfiles",
+  "main": "userjs.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ReklatsMasters/depositjs.git"
+  },
+  "keywords": [
+    "deposit",
+    "depositfiles",
+    "userjs",
+    "dfiles"
+  ],
+  "author": "Dmitry Tsvettsikh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ReklatsMasters/depositjs/issues"
+  },
+  "homepage": "https://github.com/ReklatsMasters/depositjs",
+  "dependencies": {
+    "spark-md5": "0.0.5"
+  }
+}
