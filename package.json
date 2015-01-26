@@ -22,7 +22,13 @@
     "url": "https://github.com/ReklatsMasters/depositjs/issues"
   },
   "homepage": "https://github.com/ReklatsMasters/depositjs",
-  "dependencies": {
-    "spark-md5": "0.0.5"
+  "devDependencies": {
+    "browserify": "^8",
+    "grunt": "~0.4.5",
+    "grunt-browserify": "^3.3",
+    "grunt-contrib-watch": "~0.6.1",
+    "watchify": "^2.2",
+    "gulp": "^3",
+    "vinyl-source-stream": "^1"
   }
 }
