@@ -2,7 +2,7 @@
 
 ////////////////////////////////////
 
-var md5      = require('spark-md5');
+var md5      = require('./lib/md5');
 var format   = require('url').format;
 var parseUrl = require('url').parse;
 
@@ -14,7 +14,7 @@ var parseUrl = require('url').parse;
  * @return {String}
  */
 function sign(uid) {
-	return md5.hash(uid + "dd64vJK3s.dV1/z");
+	return md5(uid + "dd64vJK3s.dV1/z");
 }
 
 /**
@@ -165,7 +165,7 @@ function downloadMain(dom) {
 }
 
 function main() {
-	if (isGateawayPage) {
+	if (isGateawayPage()) {
 		fetchDownloadPage( downloadMain );
 
 	} else if (isDownloadPage()) {
