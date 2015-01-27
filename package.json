@@ -32,5 +32,8 @@
     "vinyl-buffer": "^1.0.0",
     "vinyl-paths": "^1.0.0",
     "vinyl-source-stream": "^1"
+  },
+  "dependencies": {
+    "spark-md5": "0.0.5"
   }
 }
