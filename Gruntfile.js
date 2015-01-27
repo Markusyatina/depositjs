@@ -1,10 +1,9 @@
 module.exports = function(grunt) {
 	'use strict';
 
-	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-browserify');
  
-	grunt.registerTask('default', ['browserify', 'watch']);
+	grunt.registerTask('default', ['browserify']);
  
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
@@ -13,10 +12,6 @@ module.exports = function(grunt) {
 				src: 'userjs.js',
 				dest: 'dist/dist.js'
 			}
-		},
-		watch: {
-			files: 'user.js',
-			tasks: ['default']
 		}
 	});
 };
