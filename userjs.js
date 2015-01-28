@@ -3,6 +3,7 @@
 ////////////////////////////////////
 
 var md5      = require('./lib/md5');
+var Dom      = require('./lib/dom');
 var format   = require('url').format;
 var parseUrl = require('url').parse;
 
@@ -160,7 +161,7 @@ function downloadMain(dom) {
 	var api_url = createUrl(uid);
 
 	fetchDownloadUrl(api_url, function(download_url){
-		console.log( download_url );
+		(new Dom(download_url)).install();
 	});
 }
 
