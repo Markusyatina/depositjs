@@ -1,18 +1,17 @@
 // ==UserScript==
 // @name           Depositfiles Helper
-// @description    Get direct link without capcha & timer from depositfiles.com
-// @version        1.1.3
-// @date           2012-04-13
-// @author         ReklatsMasters
+// @description    Get direct link without capcha and timer from depositfiles.com
+// @version        {ver}
+// @date           {date}
+// @author         Dmitry Tsvettsikh
 // @homepageURL    https://github.com/ReklatsMasters/depositjs
-// @updateURL      https://raw.github.com/ReklatsMasters/depositjs/master/userjs.js
 // @include        http://depositfiles.com/files/*
 // @include        http://depositfiles.com/*/files/*
 // @include        http://depositfiles.org/files/*
 // @include        http://depositfiles.org/*/files/*
 // @include        http://dfiles.ru/*/files/*
 // @include        http://dfiles.ru/files/*
+// @include        http://dfiles.eu/*/files/*
 // @include        http://dfiles.eu/files/*
-// @require        http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js
-// @icon           http://img3.depositfiles.com/images/favicon.ico
+// @icon           http://static.dfiles.ru/images/favicon.ico
 // ==/UserScript==
