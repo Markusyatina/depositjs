@@ -153,7 +153,7 @@ function getUidFromUrl(downloader_url) {
  * @param dom {HTMLDocument}
  */
 function downloadMain(btn, dom) {
-	var downloader_url = getDownloaderUrl(dom.querySelector('#networkdownloader'));
+	var downloader_url = getDownloaderUrl(dom.getElementById('networkdownloader') || dom.getElementById('dfdownloader_frm') );
 	var uid = getUidFromUrl(downloader_url);
 	var api_url = createUrl(uid);
 
