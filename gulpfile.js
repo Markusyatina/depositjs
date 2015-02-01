@@ -5,13 +5,13 @@ var gulp       = require('gulp');
 var source     = require('vinyl-source-stream');
 var sourceFile = './userjs.js';
 var destFolder = './dist/';
+var buildFolder = './build/';
 var destFile   = 'userjs.min.js';
 var uglify     = require('gulp-uglify');
 var bufferify  = require('vinyl-buffer');
 var del        = require('del');
-var vinylPaths = require('vinyl-paths');
-var header = require('gulp-header');
-var pkg = require('./package.json');
+var header     = require('gulp-header');
+var pkg        = require('./package.json');
 
 // userjs header
 var banner = [
@@ -50,7 +50,15 @@ var locals = {
 	mysite: "https://github.com/ReklatsMasters"
 };
 
-gulp.task('browserify', function() {
+gulp.task('clean:dist', function (cb) {
+	del([destFolder], cb);
+});
+
+gulp.task('clean:build', function (cb) {
+	del([buildFolder], cb);
+});
+
+gulp.task('dist', ['clean:dist'], function() {
 	return browserify(sourceFile)
 	.bundle()
 	.pipe(source(destFile))
@@ -60,9 +68,14 @@ gulp.task('browserify', function() {
 	.pipe(gulp.dest(destFolder));
 });
 
-gulp.task('clean:tmp', function () {
-	return gulp.src(destFolder)
-		.pipe(vinylPaths(del));
+gulp.task('build', ['clean:build'], function() {
+	return browserify(sourceFile)
+	.bundle()
+	.pipe(source(destFile))
+	.pipe(bufferify())
+	.pipe(uglify())
+	.pipe(header(banner, locals))
+	.pipe(gulp.dest(buildFolder));
 });
 
-gulp.task('default', ['clean:tmp', 'browserify']);
+gulp.task('default', ['build']);
