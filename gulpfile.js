@@ -31,6 +31,7 @@ var banner = [
 	'// @include        http://dfiles.ru/files/*',
 	'// @include        http://dfiles.eu/*/files/*',
 	'// @include        http://dfiles.eu/files/*',
+	'// @grant          GM_xmlhttpRequest',
 	'// @icon           http://static.dfiles.ru/images/favicon.ico',
 	'// @license        ${lic};https://github.com/ReklatsMasters/depositjs/blob/master/LICENSE',
 	'// @copyright      ${year}, ${author} (${mysite})',

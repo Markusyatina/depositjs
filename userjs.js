@@ -1,5 +1,7 @@
 'use strict';
 
+/* global GM_xmlhttpRequest */
+
 ////////////////////////////////////
 
 var md5      = require('./lib/md5');
@@ -91,10 +93,16 @@ function fetchDownloadPage(cb) {
  * @param cb {Function}
  */
 function fetchDownloadUrl(api_url, cb) {
-	var xhr = new XMLHttpRequest();
-	xhr.open('GET', api_url, true);
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState == 4) {
+	/* jshint -W064 */
+	GM_xmlhttpRequest({
+		method: "GET",
+		url: api_url,
+		headers: {
+			"User-Agent": "Deposit Files Downloader",
+			"Accept":     "text/html, application/xhtml+xml, application/xml, */*",
+			"X-Requested-With":null
+		},
+		onload: function(xhr) {
 			if(xhr.status >= 200 && xhr.status < 300) {
 
 				var jsapi = JSON.parse( xhr.responseText );
@@ -108,18 +116,11 @@ function fetchDownloadUrl(api_url, cb) {
 			} else {
 				setTimeout(cb.bind(null, new Error()), 0);
 			}
+		},
+		onerror: function() {
+			setTimeout(cb.bind(null, new Error()), 0);
 		}
-	};
-
-	var setRequestHeader = xhr.setRequestHeader;
-
-	xhr.setRequestHeader = function(name, value) {
-		if (name == 'X-Requested-With') { return; }
-
-		setRequestHeader.call(this, name, value);
-	};
-
-	xhr.send();
+	});
 }
 
 /**
