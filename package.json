@@ -1,6 +1,6 @@
 {
   "name": "depositjs",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Helper for depositfiles without capcha, timers and limits",
   "main": "userjs.js",
   "scripts": {
