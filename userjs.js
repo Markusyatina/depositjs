@@ -22,7 +22,7 @@ function sign(uid) {
  * Генерирует url для обращения к Fastdownload API и получения ссылки на загрузку
  *
  * @param uid {String} id загрузки / пользователя из имени загрузчика
- * @return {String} 
+ * @return {String}
  */
 function createUrl(uid) {
 	var urlObj = {
@@ -41,7 +41,7 @@ function createUrl(uid) {
 }
 
 /**
- * Проверяет, является ли текущая страница 
+ * Проверяет, является ли текущая страница
  * страницей с таймером
  *
  * @return {bool}
@@ -100,12 +100,13 @@ function fetchDownloadUrl(api_url, cb) {
 				var jsapi = JSON.parse( xhr.responseText );
 
 				if (!jsapi.status_code) {
-					throw new Error('Download error - API request fail');
+					setTimeout(cb.bind(null, new Error()), 0);
+					return;
 				}
 
-				setTimeout(cb.bind(null, jsapi.data.file.download_url), 0);
+				setTimeout(cb.bind(null, null, jsapi.data.file.download_url), 0);
 			} else {
-				throw new Error('Download error - ' + xhr.status);
+				setTimeout(cb.bind(null, new Error()), 0);
 			}
 		}
 	};
@@ -114,10 +115,6 @@ function fetchDownloadUrl(api_url, cb) {
 
 	xhr.setRequestHeader = function(name, value) {
 		if (name == 'X-Requested-With') { return; }
-		
-		if (name == 'User-Agent') {
-			return 'Deposit Files Downloader';
-		}
 
 		setRequestHeader.call(this, name, value);
 	};
@@ -152,25 +149,33 @@ function getUidFromUrl(downloader_url) {
 
 /**
  * Главная функция для страницы загрузки
- * 
+ *
  * @param dom {HTMLDocument}
  */
-function downloadMain(dom) {
+function downloadMain(btn, dom) {
 	var downloader_url = getDownloaderUrl(dom.querySelector('#networkdownloader'));
 	var uid = getUidFromUrl(downloader_url);
 	var api_url = createUrl(uid);
 
-	fetchDownloadUrl(api_url, function(download_url){
-		(new Dom(download_url)).install();
+	fetchDownloadUrl(api_url, function(err, download_url){
+		if (err) {
+			btn.showError();
+			return;
+		}
+
+		btn.bindUrl(download_url).showDownloadBar();
 	});
 }
 
 function main() {
+	var btn = new Dom();
+	btn.install().showSpinner();
+
 	if (isGateawayPage()) {
-		fetchDownloadPage( downloadMain );
+		fetchDownloadPage( downloadMain.bind(null, btn) );
 
 	} else if (isDownloadPage()) {
-		downloadMain(document);
+		downloadMain(btn, document);
 
 	} else {
 		throw new Error('Undefined page');
