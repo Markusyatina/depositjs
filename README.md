@@ -1,4 +1,4 @@
-depositjs
+depositjs [![donate](https://img.shields.io/gratipay/ReklatsMasters.svg)](https://gratipay.com/ReklatsMasters/)
 =========
 
 Helper for depositfiles.com. Moved from [http://userscripts.org/scripts/show/132113](http://userscripts.org/scripts/show/132113). 
